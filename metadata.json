@@ -1,0 +1,6 @@
+{
+  "name": "Tool Failure Playground",
+  "description": "An interactive AI reliability lab for visualizing tool failures, retries, and hallucinations in agentic runtimes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["AI Agent Visualization", "Fault Injection", "Distributed Tracing"]
+}
