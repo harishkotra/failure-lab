@@ -61,3 +61,18 @@ To run the full synthesis engine, you need to provide API keys in the app's side
 - **Chain of Thought (CoT) Visualizer:** Expand the graph to show internal reasoning steps before tool dispatch.
 - **History Replay:** Save execution traces to a database (like Firebase) to replay past failures and analyze agent "hallucination" trends.
 - **Multi-Agent Support:** Visualize communication between different agent personas (e.g., Researcher and Writer).
+
+#### Screenshots
+
+<img width="1530" height="1040" alt="failure-lab-1" src="https://github.com/user-attachments/assets/2115cf8a-fc3a-4ab8-95d8-21a5a8604dee" />
+<img width="1532" height="1041" alt="failure-lab-2" src="https://github.com/user-attachments/assets/d02cfec2-0ae4-46a2-b4cd-22244c5ea6f1" />
+<img width="1530" height="1042" alt="failure-lab-3" src="https://github.com/user-attachments/assets/f0cdf932-aeab-4c7c-8a12-9c58cda6b425" />
+<img width="1529" height="1040" alt="failure-lab-4" src="https://github.com/user-attachments/assets/1c1221e2-dd87-465d-9a34-b180e6a2493f" />
+<img width="1530" height="1038" alt="failure-lab-5" src="https://github.com/user-attachments/assets/d0dac720-9f3c-45cd-bb1c-ee0f500347e8" />
+<img width="1530" height="1041" alt="failure-lab-6" src="https://github.com/user-attachments/assets/1c616720-cd9d-4901-9bc0-20895dece6cd" />
+<img width="1527" height="1040" alt="failure-lab-7" src="https://github.com/user-attachments/assets/1a48871e-aca6-4505-b579-a0d6606cb397" />
+<img width="1529" height="1044" alt="failure-lab-8" src="https://github.com/user-attachments/assets/4bf5eadd-08ce-48c2-bab4-86a3afd59ff0" />
+<img width="1278" height="1041" alt="failure-lab-9" src="https://github.com/user-attachments/assets/3699f40b-30fc-4505-9758-fd97ee9a41e9" />
+<img width="1530" height="1040" alt="failure-lab-10" src="https://github.com/user-attachments/assets/ab9235d8-b19b-406d-ad39-7c988d002e44" />
+<img width="1529" height="1036" alt="failure-lab-11" src="https://github.com/user-attachments/assets/f159ff66-9d95-42e4-b86e-ca22e5ddcf1d" />
+<img width="1532" height="1040" alt="failure-lab-12" src="https://github.com/user-attachments/assets/4b1f38a6-3d82-42f8-8eb2-a0e0aa8158c2" />
