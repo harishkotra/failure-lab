@@ -20,6 +20,9 @@ Modern AI agents are brittle at the tool-calling layer. Failure Lab provides a "
 - **Inference Engines:** 
     - Google Gemini AI (@google/genai)
     - OpenAI Node SDK
+    - Featherless.ai (OpenAI Compatible APIs)
+    - Ollama
+    - Anthropic's Claude API
 
 ## Architecture
 
