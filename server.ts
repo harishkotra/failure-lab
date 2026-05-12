@@ -2,6 +2,8 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import dotenv from "dotenv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
 dotenv.config();
 
@@ -10,6 +12,45 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // API Route for Synthesis (Backend Proxy to avoid CORS/Connection issues)
+  app.post("/api/synthesis", async (req, res) => {
+    const { provider, model, apiKey, prompt, toolResults } = req.body;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: "Missing API Key" });
+    }
+
+    try {
+      if (provider === 'openai') {
+        const openai = new OpenAI({ apiKey });
+        const response = await openai.chat.completions.create({
+          model: model || "gpt-4o",
+          messages: [
+            { role: "system", content: "You are a highly advanced AI Synthesis Engine. Your task is to take the user prompt and the results of various tool calls and generate a detailed plan. If a tool failed, provide fallback recommendations." },
+            { role: "user", content: `User Prompt: ${prompt}\n\Tool Results: ${JSON.stringify(toolResults, null, 2)}` }
+          ]
+        });
+        return res.json({ result: response.choices[0].message.content });
+      } else {
+        // Gemini
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const genModel = genAI.getGenerativeModel({ 
+          model: model || "gemini-1.5-flash",
+          systemInstruction: "You are a highly advanced AI Synthesis Engine. Your task is to take the user prompt and the results of various tool calls and generate a detailed plan. If a tool failed, provide fallback recommendations. Use Markdown."
+        });
+        const response = await genModel.generateContent(`User Prompt: ${prompt}\n\nTool Results: ${JSON.stringify(toolResults, null, 2)}`);
+        return res.json({ result: response.response.text() });
+      }
+    } catch (error: any) {
+      console.error("Backend Synthesis Error:", error);
+      let message = error.message;
+      if (error.status === 401 || message.includes('invalid_api_key') || message.includes('Incorrect API key')) {
+        message = "Authentication Failed: The provided API key is invalid or has expired. Please verify your key in the sidebar.";
+      }
+      res.status(500).json({ error: "SYNTHESIS_FAILED", message });
+    }
+  });
 
   // API Proxy for Tools with Failure Injection
   app.post("/api/tool-call", async (req, res) => {

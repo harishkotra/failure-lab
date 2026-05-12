@@ -1,4 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
 import { useStore, ToolConfig, ToolStatus, TraceEvent } from '../store/useStore';
 import { Node, Edge } from '@xyflow/react';
 
@@ -166,7 +165,7 @@ export async function runSimulation(
   
   // Create Output Node
   const outputId = 'output-synthesis';
-  addNode(outputId, 'Synthesis Engine', 'outcome', 'running', 250, 450);
+  addNode(outputId, 'Outcome Synthesis', 'outcome', 'running', 250, 450);
 
   // Connect all tools to output
   tools.forEach(t => {
@@ -180,53 +179,47 @@ export async function runSimulation(
     const inferenceKey = apiKeys.inference;
     const fallbackGeminiKey = process.env.GEMINI_API_KEY;
     
-    if (selectedModel === 'OpenAI GPT-4o') {
-      if (!inferenceKey) {
-        throw new Error("Missing 'Inference API Key' in Sidebar for OpenAI.");
-      }
-      const { OpenAI } = await import('openai');
-      const openai = new OpenAI({ apiKey: inferenceKey, dangerouslyAllowBrowser: true });
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: "You are a highly advanced AI Synthesis Engine." },
-          { role: "user", content: `User Prompt: ${prompt}\n\nTool Results: ${JSON.stringify(toolResults, null, 2)}\n\nGenerate the comprehensive final plan now.` }
-        ]
-      });
-      finalPlan = response.choices[0].message.content || "OpenAI failed to generate a response.";
-    } else {
-      const apiKey = inferenceKey || fallbackGeminiKey;
-      if (!apiKey) {
-        throw new Error("NO_API_KEY");
-      }
+    let provider = 'gemini';
+    let modelId = 'gemini-1.5-flash';
+    let apiKey = '';
 
-      // Default to Gemini for other selections
+    if (selectedModel === 'OpenAI GPT-4o') {
+      provider = 'openai';
+      modelId = 'gpt-4o';
+      apiKey = inferenceKey || '';
+      if (!apiKey) throw new Error("Missing 'Inference API Key' for OpenAI.");
+    } else {
+      provider = 'gemini';
       const modelMapping: Record<string, string> = {
         'Gemini 2.0 (Integrated)': 'gemini-2.0-flash',
         'Anthropic Claude 3.5': 'gemini-1.5-flash',
         'Featherless (Compatible)': 'gemini-1.5-flash',
         'Ollama (Localhost)': 'gemini-1.5-flash'
       };
-
-      const modelId = modelMapping[selectedModel] || 'gemini-1.5-flash';
-      const genAI = new GoogleGenAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: modelId,
-        systemInstruction: `You are a highly advanced AI Synthesis Engine. 
-        Your task is to take the user prompt and the results of various tool calls (weather, hotels, flights, etc.) and generate a high-quality, professional, and detailed plan or response.
-        If a tool failed, you should acknowledge it and provide an 'optimistic hallucination' or a fallback recommendation based on general knowledge to maintain a high-quality user experience.
-        Be thorough and exhaustive. Use Markdown for formatting.`,
-      });
-
-      const response = await model.generateContent(`User Prompt: ${prompt}
-            
-        Tool Results:
-        ${JSON.stringify(toolResults, null, 2)}
-        
-        Generate the comprehensive final plan now.`);
-
-      finalPlan = response.response.text() || "Synthesis engine failed to generate text.";
+      modelId = modelMapping[selectedModel] || 'gemini-1.5-flash';
+      apiKey = inferenceKey || fallbackGeminiKey || '';
+      if (!apiKey) throw new Error("NO_API_KEY");
     }
+
+    const response = await fetch("/api/synthesis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provider,
+        model: modelId,
+        apiKey,
+        prompt,
+        toolResults
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.message || `HTTP_${response.status}`);
+    }
+
+    const data = await response.json();
+    finalPlan = data.result || "Synthesis engine returned an empty result.";
   } catch (err: any) {
     console.error("Synthesis Error:", err);
     finalPlan = err.message === "NO_API_KEY" 
